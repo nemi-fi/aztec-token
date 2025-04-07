@@ -27,7 +27,7 @@ pub contract Token {
         event::event_interface::EventInterface,
         macros::{
             events::event,
-            functions::{initializer, internal, private, public, view},
+            functions::{initializer, internal, private, public, utility, view},
             storage::storage,
         },
         prelude::{AztecAddress, Map, PublicContext, PublicImmutable, PublicMutable},
@@ -126,25 +126,25 @@ pub contract Token {
 
     #[public]
     #[view]
-    fn public_get_symbol() -> pub FieldCompressedString {
+    fn public_get_symbol() -> FieldCompressedString {
         storage.symbol.read()
     }
 
     #[private]
     #[view]
-    fn private_get_symbol() -> pub FieldCompressedString {
+    fn private_get_symbol() -> FieldCompressedString {
         storage.symbol.read()
     }
 
     #[public]
     #[view]
-    fn public_get_decimals() -> pub u8 {
+    fn public_get_decimals() -> u8 {
         storage.decimals.read()
     }
 
     #[private]
     #[view]
-    fn private_get_decimals() -> pub u8 {
+    fn private_get_decimals() -> u8 {
         storage.decimals.read()
     }
 
@@ -308,15 +308,18 @@ pub contract Token {
             to,
             from,
         ));
+
         // We don't constrain encryption of the note log in `transfer` (unlike in `transfer_in_private`) because the transfer
         // function is only designed to be used in situations where the event is not strictly necessary (e.g. payment to
         // another person where the payment is considered to be successful when the other party successfully decrypts a
         // note).
+        // docs:start:encrypted_unconstrained
         Transfer { from, to, amount }.emit(encode_and_encrypt_event_unconstrained(
             &mut context,
             to,
             from,
         ));
+        // docs:end:encrypted_unconstrained
     }
     // docs:end:transfer
 
@@ -394,13 +397,11 @@ pub contract Token {
         // docs:end:assert_current_call_valid_authwit
 
         // docs:start:increase_private_balance
-        // docs:start:encrypted
         storage.balances.at(from).sub(from, amount).emit(encode_and_encrypt_note(
             &mut context,
             from,
             from,
         ));
-        // docs:end:encrypted
         // docs:end:increase_private_balance
         storage.balances.at(to).add(to, amount).emit(encode_and_encrypt_note(&mut context, to, from));
     }
@@ -676,22 +677,25 @@ pub contract Token {
         partial_note.complete(amount, &mut context);
     }
 
-    /// Unconstrained ///
     // docs:start:balance_of_private
-    pub(crate) unconstrained fn balance_of_private(owner: AztecAddress) -> pub u128 {
+    #[utility]
+    pub(crate) unconstrained fn balance_of_private(owner: AztecAddress) -> u128 {
         storage.balances.at(owner).balance_of()
     }
     // docs:end:balance_of_private
 
-    pub(crate) unconstrained fn un_balance_of_public(owner: AztecAddress) -> pub u128 {
+    #[utility]
+    pub(crate) unconstrained fn un_balance_of_public(owner: AztecAddress) -> u128 {
         storage.public_balances.at(owner).read()
     }
 
-    pub(crate) unconstrained fn un_total_supply() -> pub u128 {
+    #[utility]
+    pub(crate) unconstrained fn un_total_supply() -> u128 {
         storage.total_supply.read()
     }
 
-    pub(crate) unconstrained fn un_get_decimals() -> pub u8 {
+    #[utility]
+    pub(crate) unconstrained fn un_get_decimals() -> u8 {
         storage.decimals.read()
     }
 }
