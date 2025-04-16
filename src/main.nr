@@ -20,15 +20,15 @@ pub contract Token {
 
     use dep::aztec::{
         context::{PrivateCallInterface, PrivateContext},
-        encrypted_logs::log_assembly_strategies::default_aes128::{
-            event::encode_and_encrypt_event_unconstrained,
-            note::{encode_and_encrypt_note, encode_and_encrypt_note_unconstrained},
-        },
         event::event_interface::EventInterface,
         macros::{
             events::event,
             functions::{initializer, internal, private, public, utility, view},
             storage::storage,
+        },
+        messages::logs::{
+            event::encode_and_encrypt_event_unconstrained,
+            note::{encode_and_encrypt_note, encode_and_encrypt_note_unconstrained},
         },
         prelude::{AztecAddress, Map, PublicContext, PublicImmutable, PublicMutable},
         protocol_types::traits::Serialize,
@@ -126,25 +126,25 @@ pub contract Token {
 
     #[public]
     #[view]
-    fn public_get_symbol() -> FieldCompressedString {
+    fn public_get_symbol() -> pub FieldCompressedString {
         storage.symbol.read()
     }
 
     #[private]
     #[view]
-    fn private_get_symbol() -> FieldCompressedString {
+    fn private_get_symbol() -> pub FieldCompressedString {
         storage.symbol.read()
     }
 
     #[public]
     #[view]
-    fn public_get_decimals() -> u8 {
+    fn public_get_decimals() -> pub u8 {
         storage.decimals.read()
     }
 
     #[private]
     #[view]
-    fn private_get_decimals() -> u8 {
+    fn private_get_decimals() -> pub u8 {
         storage.decimals.read()
     }
 

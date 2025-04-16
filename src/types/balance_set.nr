@@ -1,6 +1,9 @@
 use dep::aztec::{
     context::{PrivateContext, UtilityContext},
-    note::{note_emission::OuterNoteEmission, retrieved_note::RetrievedNote},
+    note::{
+        note_emission::OuterNoteEmission, note_getter_options::SortOrder,
+        note_interface::NoteProperties, retrieved_note::RetrievedNote,
+    },
     protocol_types::{address::AztecAddress, constants::MAX_NOTE_HASH_READ_REQUESTS_PER_CALL},
 };
 use dep::aztec::prelude::{NoteGetterOptions, NoteViewerOptions, PrivateSet};
@@ -81,6 +84,7 @@ impl BalanceSet<&mut PrivateContext> {
         // might result in is simply higher DA costs due to more nullifiers being emitted. Since we don't care
         // about proving optimal note usage, we can save these constraints and make the circuit smaller.
         let options = NoteGetterOptions::with_preprocessor(preprocess_notes_min_sum, target_amount)
+            .sort(UintNote::properties().value, SortOrder.DESC)
             .set_limit(max_notes);
         let notes = self.set.pop_notes(options);
 
